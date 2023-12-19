@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from shapiro_test_module import test_outlier_detection_and_removal, shapiro_test, detect_and_remove_outliers_iqr, \
+    detect_and_remove_outliers_zscore, parametric_test_anova, non_parametric_test_chi_square, \
+    one_sample_chi_square_test, multivariate_regression
 
 
 def load_and_clean_data(file_path):
@@ -38,9 +41,10 @@ def plot_histograms(df, numeric_columns):
     plt.suptitle('Sayısal Değerlerin Histogramları', y=1.02)
     plt.show()
 
+
 def plot_boxplots(df, numeric_columns):
     # Sayısal sütunların kutu grafiğini çizme
-    fig, axes = plt.subplots(nrows=len(numeric_columns) // 2, ncols=2, figsize=(15, 15))
+    fig, axes = plt.subplots(nrows=(len(numeric_columns) + 1) // 2, ncols=2, figsize=(15, 15))
     fig.subplots_adjust(hspace=0.5)
 
     for i, col in enumerate(numeric_columns):
@@ -48,9 +52,13 @@ def plot_boxplots(df, numeric_columns):
         col = i % 2
         ax = axes[row, col]
 
-        sns.boxplot(x=df[col], ax=ax)
-        ax.set_title(f'Box Plot - {col}')
-        ax.set_xlabel(col)
+        try:
+            print(f"Plotting boxplot for {col}")
+            sns.boxplot(x=col, data=df, ax=ax)
+            ax.set_title(f'Box Plot - {col}')
+            ax.set_xlabel(col)
+        except Exception as e:
+            print(f"Error plotting boxplot for {col}: {e}")
 
     plt.show()
 
@@ -65,10 +73,12 @@ def plot_correlation_matrix(df, numeric_columns):
     plt.title('Değişkenler Arası Korelasyon Matrisi')
     plt.show()
 
+
 def plot_pairplot(df, numeric_columns):
     # Sayısal sütunlar arasındaki ilişkiyi çizme
     sns.pairplot(df[numeric_columns])
     plt.show()
+
 
 def plot_pairgrid(df, numeric_columns):
     # Sayısal sütunlar arasındaki ilişkiyi daha detaylı çizme
@@ -76,6 +86,7 @@ def plot_pairgrid(df, numeric_columns):
     g.map(plt.scatter)
     g.fig.suptitle('Pair Grid - Scatter Plots', y=1.02)  # Başlık ekleme
     plt.show()
+
 
 def plot_violin_plots(df, numeric_columns):
     # Sayısal sütunların violin grafiğini çizme
@@ -93,11 +104,13 @@ def plot_violin_plots(df, numeric_columns):
 
     plt.show()
 
+
 def plot_categorical_with_hue(df, categorical_column, hue_column):
     # Kategorik sütunu ve renklendirme sütununu kullanarak grafiği çizme
     sns.countplot(x=df[categorical_column], hue=df[hue_column])
     plt.title(f'Categorical Plot with Hue - {categorical_column} vs {hue_column}')
     plt.show()
+
 
 def plot_bar_chart(df, categorical_columns):
     # Bar grafiğini çizme
@@ -113,25 +126,58 @@ def plot_bar_chart(df, categorical_columns):
             plt.title(f'Bar Chart - {col}')
             plt.show()
     else:
-        raise ValueError("Invalid input for categorical_columns. Pass either a single column name or a list of column names.")
+        raise ValueError(
+            "Invalid input for categorical_columns. Pass either a single column name or a list of column names.")
 
 
 if __name__ == "__main__":
     file_path = 'mobile_cpu.csv'
+    categorical_column = 'Model'
+    dependent_variable = 'Perf. Rating'
+    independent_variables = ['TDP Watt', 'MHz - Turbo', 'Cores / Threads', 'Cinebench R15 CPU Single 64Bit',
+                             'Cinebench R23 Single Core']
 
-    # Veriyi yükle ve temizle
     df, numeric_columns = load_and_clean_data(file_path)
 
-    # Veri özetini görüntüle
+    # Shapiro-Wilk normalite testini uygula
+    shapiro_test(df, numeric_columns)
+
+    # Z-puanına göre aykırı değerleri tespit et ve kaldır
+    detect_and_remove_outliers_zscore(df, numeric_columns)
+
+    # IQR yöntemine göre aykırı değerleri tespit et ve kaldır
+    detect_and_remove_outliers_iqr(df, numeric_columns)
+
+    # Aykırı değer tespiti ve kaldırma işlemini test et
+    test_outlier_detection_and_removal(df, numeric_columns)
+
+    # Kategorik sütunlar için renkli grafik çizimi
+    plot_categorical_with_hue(df, categorical_column, dependent_variable)
+
+    # Çoklu değişken regresyon analizi
+    multivariate_regression(df, dependent_variable, independent_variables)
+
+    # Veri setinin istatistiksel özetini gösterme
     show_data_summary(df)
 
-    # Histogramları çiz
+    # Sayısal sütunların histogramlarını çizme
     plot_histograms(df, numeric_columns)
 
+    # Sayısal sütunlar arasındaki ilişkiyi çizme
     plot_pairplot(df, numeric_columns)
 
+    # Belirli kategorik sütunlar için bar grafik çizimi
     plot_bar_chart(df, ['TDP Watt', 'MHz - Turbo'])
 
-    plot_pairgrid(df,numeric_columns)
-    # Korelasyon matrisini görselleştir
+    # Sayısal sütunlar arasındaki ilişkiyi daha detaylı çizme
+    plot_pairgrid(df, numeric_columns)
+
+    # Sayısal sütunların kutu grafiğini çizme
+    print(df.columns)
+    plot_boxplots(df, numeric_columns)
+
+    # Sayısal sütunlar arasındaki korelasyon matrisini çizme
     plot_correlation_matrix(df, numeric_columns)
+
+    # Aykırı değer tespiti ve kaldırma işlemini tekrar test et
+    test_outlier_detection_and_removal(df, numeric_columns)
