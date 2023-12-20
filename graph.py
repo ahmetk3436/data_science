@@ -134,50 +134,59 @@ if __name__ == "__main__":
     file_path = 'mobile_cpu.csv'
     categorical_column = 'Model'
     dependent_variable = 'Perf. Rating'
-    independent_variables = ['TDP Watt', 'MHz - Turbo', 'Cores / Threads', 'Cinebench R15 CPU Single 64Bit',
-                             'Cinebench R23 Single Core']
+    independent_variables = ['TDP Watt', 'MHz - Turbo', 'Cores / Threads', 'Cinebench R15 CPU Single 64Bit', 'Cinebench R15 CPU Multi 64Bit', 'Cinebench R23 Single Core', 'Cinebench R23 Multi Core', 'x265', 'Blender(-)', '7-Zip Single', '7-Zip', 'Geekbench 5.5 Single-Core', 'Geekbench 5.5 Multi-Core', 'WebXPRT 3']
 
     df, numeric_columns = load_and_clean_data(file_path)
+    print("Veri yüklendi ve temizlendi \n")
 
     # Shapiro-Wilk normalite testini uygula
     shapiro_test(df, numeric_columns)
+    print("Shapiro testi tamamlandı \n")
 
     # Z-puanına göre aykırı değerleri tespit et ve kaldır
     detect_and_remove_outliers_zscore(df, numeric_columns)
+    print("Z-puanına göre aykırı veriler tespit edildi ve kaldırıldı \n")
 
     # IQR yöntemine göre aykırı değerleri tespit et ve kaldır
     detect_and_remove_outliers_iqr(df, numeric_columns)
+    print("IQR yöntemine göre aykırı veriler tespit edildi ve kaldırıldı \n")
 
     # Aykırı değer tespiti ve kaldırma işlemini test et
     test_outlier_detection_and_removal(df, numeric_columns)
-
-    # Kategorik sütunlar için renkli grafik çizimi
-    plot_categorical_with_hue(df, categorical_column, dependent_variable)
+    print("Aykırı veriler tespit edildi ve kaldırıldı \n")
 
     # Çoklu değişken regresyon analizi
     multivariate_regression(df, dependent_variable, independent_variables)
+    print("Çoklu değişkene göre regresyon analizi yapıldı \n")
 
     # Veri setinin istatistiksel özetini gösterme
     show_data_summary(df)
+    print("Veri setinin istatistiksel özeti gösterildi \n")
+
+    # Kategorik sütunlar için renkli grafik çizimi
+    plot_categorical_with_hue(df, categorical_column, dependent_variable)
+    print("Kategorik sütunlar için renkli grafik çizimi yapıldı \n")
 
     # Sayısal sütunların histogramlarını çizme
     plot_histograms(df, numeric_columns)
+    print("Sayısal sütunların histogramları çizildi \n")
 
     # Sayısal sütunlar arasındaki ilişkiyi çizme
     plot_pairplot(df, numeric_columns)
+    print("Sayısal sütunlar arasındaki ilişkiyi çizildi \n")
 
     # Belirli kategorik sütunlar için bar grafik çizimi
     plot_bar_chart(df, ['TDP Watt', 'MHz - Turbo'])
+    print("Belirli kategorik sütunlar için bar grafik çizildi \n")
 
     # Sayısal sütunlar arasındaki ilişkiyi daha detaylı çizme
     plot_pairgrid(df, numeric_columns)
+    print("Sayısal sütunlar arasındaki ilişkiyi daha detaylı çizildi \n")
 
     # Sayısal sütunların kutu grafiğini çizme
-    print(df.columns)
-    plot_boxplots(df, numeric_columns)
+    # plot_boxplots(df, numeric_columns)
+    # print("Sayısal sütunların kutu grafiğini çizildi \n")
 
     # Sayısal sütunlar arasındaki korelasyon matrisini çizme
     plot_correlation_matrix(df, numeric_columns)
-
-    # Aykırı değer tespiti ve kaldırma işlemini tekrar test et
-    test_outlier_detection_and_removal(df, numeric_columns)
+    print("Sayısal sütunlar arasındaki korelasyon matrisini çizildi \n")
