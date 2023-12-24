@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from statsmodels.graphics.gofplots import qqplot
+
 from shapiro_test_module import test_outlier_detection_and_removal, shapiro_test, detect_and_remove_outliers_iqr, \
     detect_and_remove_outliers_zscore, parametric_test_anova, non_parametric_test_chi_square, \
     one_sample_chi_square_test, multivariate_regression
@@ -130,11 +132,31 @@ def plot_bar_chart(df, categorical_columns):
             "Invalid input for categorical_columns. Pass either a single column name or a list of column names.")
 
 
+def qq_plot(df, numeric_columns):
+    # Quantile-Quantile (QQ) plots çizme
+    for col in numeric_columns:
+        qqplot(df[col], line='s')  # 's' for standardized line
+        plt.title(f'QQ Plot - {col}')
+        plt.show()
+
+
+def scatter_plot(df, x_column, y_column):
+    # Scatter plot çizme
+    plt.scatter(df[x_column], df[y_column])
+    plt.title(f'Scatter Plot - {x_column} vs {y_column}')
+    plt.xlabel(x_column)
+    plt.ylabel(y_column)
+    plt.show()
+
+
 if __name__ == "__main__":
     file_path = 'mobile_cpu.csv'
     categorical_column = 'Model'
     dependent_variable = 'Perf. Rating'
-    independent_variables = ['TDP Watt', 'MHz - Turbo', 'Cores / Threads', 'Cinebench R15 CPU Single 64Bit', 'Cinebench R15 CPU Multi 64Bit', 'Cinebench R23 Single Core', 'Cinebench R23 Multi Core', 'x265', 'Blender(-)', '7-Zip Single', '7-Zip', 'Geekbench 5.5 Single-Core', 'Geekbench 5.5 Multi-Core', 'WebXPRT 3']
+    independent_variables = ['TDP Watt', 'MHz - Turbo', 'Cores / Threads', 'Cinebench R15 CPU Single 64Bit',
+                             'Cinebench R15 CPU Multi 64Bit', 'Cinebench R23 Single Core', 'Cinebench R23 Multi Core',
+                             'x265', 'Blender(-)', '7-Zip Single', '7-Zip', 'Geekbench 5.5 Single-Core',
+                             'Geekbench 5.5 Multi-Core', 'WebXPRT 3']
 
     df, numeric_columns = load_and_clean_data(file_path)
     print("Veri yüklendi ve temizlendi \n")
@@ -187,6 +209,9 @@ if __name__ == "__main__":
     # plot_boxplots(df, numeric_columns)
     # print("Sayısal sütunların kutu grafiğini çizildi \n")
 
+    qq_plot(df, numeric_columns)
+
+    scatter_plot(df, 'TDP Watt', 'Perf. Rating')
     # Sayısal sütunlar arasındaki korelasyon matrisini çizme
     plot_correlation_matrix(df, numeric_columns)
     print("Sayısal sütunlar arasındaki korelasyon matrisini çizildi \n")
