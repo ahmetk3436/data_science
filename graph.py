@@ -2,7 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import StandardScaler
 from statsmodels.graphics.gofplots import qqplot
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 
 from shapiro_test_module import test_outlier_detection_and_removal, shapiro_test, detect_and_remove_outliers_iqr, \
     detect_and_remove_outliers_zscore, parametric_test_anova, non_parametric_test_chi_square, \
@@ -29,6 +33,28 @@ def load_and_clean_data(file_path):
     df[numeric_columns] = df[numeric_columns].fillna(df[numeric_columns].mean())
 
     return df, numeric_columns
+
+
+def build_and_evaluate_model(df, numeric_columns, target_column):
+    # Model için özellikler (features) ve hedef değişkeni (target variable) seçme
+    X = df[numeric_columns]
+    y = df[target_column]
+
+    # Veriyi eğitim ve test setlerine bölelim
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Modeli oluşturup eğitme
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    # Test seti üzerinde tahmin yapma
+    y_pred = model.predict(X_test)
+
+    # Modelin performansını değerlendirme
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"Mean Squared Error: {mse}")
+
+    return model
 
 
 def show_data_summary(df):
@@ -161,6 +187,39 @@ if __name__ == "__main__":
     df, numeric_columns = load_and_clean_data(file_path)
     print("Veri yüklendi ve temizlendi \n")
 
+    model = build_and_evaluate_model(df, numeric_columns, dependent_variable)
+
+    scaler = StandardScaler()
+    y_train_scaled = scaler.fit_transform(df[['Perf. Rating']].values.reshape(-1, 1))
+
+    # Dışarıdan veri alıp tahmin yapma
+    new_data = pd.DataFrame({
+        'TDP Watt': [80],
+        'MHz - Turbo': [2500],
+        'Cores / Threads': [8],
+        'Cinebench R15 CPU Single 64Bit': [100],
+        'Cinebench R15 CPU Multi 64Bit': [800],
+        'Cinebench R23 Single Core': [120],
+        'Cinebench R23 Multi Core': [1000],
+        'x265': [150],
+        'Blender(-)': [500],
+        '7-Zip Single': [400],
+        '7-Zip': [2000],
+        'Geekbench 5.5 Single-Core': [1200],
+        'Geekbench 5.5 Multi-Core': [6000],
+        'WebXPRT 3': [250],
+        'Perf. Rating': [0]
+    })
+
+    new_data_features = new_data[numeric_columns]
+
+    # Tahmin yapma
+    prediction_scaled = model.predict(new_data_features)
+
+    prediction_original_scale = scaler.inverse_transform(prediction_scaled.reshape(-1, 1))
+
+    print(f"Tahmin Edilen Performans Değeri (Orjinal Ölçekte): {prediction_original_scale} \n")
+
     # Shapiro-Wilk normalite testini uygula
     shapiro_test(df, numeric_columns)
     print("Shapiro testi tamamlandı \n")
@@ -215,3 +274,4 @@ if __name__ == "__main__":
     # Sayısal sütunlar arasındaki korelasyon matrisini çizme
     plot_correlation_matrix(df, numeric_columns)
     print("Sayısal sütunlar arasındaki korelasyon matrisini çizildi \n")
+
