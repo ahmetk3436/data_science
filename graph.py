@@ -181,8 +181,7 @@ if __name__ == "__main__":
     dependent_variable = 'Perf. Rating'
     independent_variables = ['TDP Watt', 'MHz - Turbo', 'Cores / Threads', 'Cinebench R15 CPU Single 64Bit',
                              'Cinebench R15 CPU Multi 64Bit', 'Cinebench R23 Single Core', 'Cinebench R23 Multi Core',
-                             'x265', 'Blender(-)', '7-Zip Single', '7-Zip', 'Geekbench 5.5 Single-Core',
-                             'Geekbench 5.5 Multi-Core', 'WebXPRT 3']
+                             ]
 
     df, numeric_columns = load_and_clean_data(file_path)
     print("Veri yüklendi ve temizlendi \n")
@@ -259,9 +258,9 @@ if __name__ == "__main__":
     # Belirli kategorik sütunlar için bar grafik çizimi
     plot_bar_chart(df, ['TDP Watt', 'MHz - Turbo'])
     print("Belirli kategorik sütunlar için bar grafik çizildi \n")
-
+    detail_columns = ['TDP Watt','Perf. Rating','MHz - Turbo']
     # Sayısal sütunlar arasındaki ilişkiyi daha detaylı çizme
-    plot_pairgrid(df, numeric_columns)
+    plot_pairgrid(df,detail_columns)
     print("Sayısal sütunlar arasındaki ilişkiyi daha detaylı çizildi \n")
 
     # Sayısal sütunların kutu grafiğini çizme
